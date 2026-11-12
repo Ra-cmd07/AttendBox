@@ -3,9 +3,10 @@
  * This allows the app to work on any network without hardcoded IPs
  */
 export const getApiBaseUrl = (): string => {
-  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  // Check both VITE_API_URL and VITE_API_BASE_URL for backwards compatibility
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
   if (envUrl && envUrl.trim()) {
-    return envUrl;
+    return envUrl.replace('/api', ''); // Remove /api suffix if present
   }
   
   // Construct dynamically from current hostname
