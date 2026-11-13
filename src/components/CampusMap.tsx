@@ -791,53 +791,53 @@ export default function CampusMap({
         />
       )}
 
-      {/* Quick Access Button to View Library Floors - Always Visible */}
-      <Paper
-        elevation={6}
-        sx={{
-          position: 'absolute',
-          top: 16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1000,
-          p: 2,
-          bgcolor: 'rgba(139, 92, 246, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 3,
-          border: '2px solid #7c3aed',
-        }}
-      >
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          onClick={() => {
-            const library = buildings.find(b => b.name === 'Library');
-            if (library) {
-              setSelectedBuilding(library);
-            } else {
-              alert('Library building not found. Please wait...');
-            }
-          }}
+      {/* Quick Access Button to View Library Floors - Shows only when buildings are loaded */}
+      {buildings.length > 0 && !selectedBuilding && (
+        <Paper
+          elevation={6}
           sx={{
-            bgcolor: 'white',
-            color: '#8b5cf6',
-            textTransform: 'none',
-            fontWeight: 700,
-            fontSize: '1.1rem',
-            px: 4,
-            py: 1.5,
-            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
-            '&:hover': {
-              bgcolor: '#f5f3ff',
-              transform: 'scale(1.05)',
-            },
-            transition: 'all 0.2s',
+            position: 'absolute',
+            top: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            p: 2,
+            bgcolor: 'rgba(139, 92, 246, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 3,
+            border: '2px solid #7c3aed',
           }}
         >
-          🏢 Click Here to View Library Floors & Rooms
-        </Button>
-      </Paper>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={() => {
+              const library = buildings.find(b => b.name === 'Library');
+              if (library) {
+                setSelectedBuilding(library);
+              }
+            }}
+            sx={{
+              bgcolor: 'white',
+              color: '#8b5cf6',
+              textTransform: 'none',
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              px: 4,
+              py: 1.5,
+              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+              '&:hover': {
+                bgcolor: '#f5f3ff',
+                transform: 'scale(1.05)',
+              },
+              transition: 'all 0.2s',
+            }}
+          >
+            🏢 Click Here to View Library Floors & Rooms
+          </Button>
+        </Paper>
+      )}
 
       {/* Map Legend */}
       <Paper

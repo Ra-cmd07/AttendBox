@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
 import type { AttendanceRecord, ParentProfile, Student } from '../types';
 import BLEPositioningMap from '../components/BLEPositioningMap';
+import CampusMap from '../components/CampusMap';
 import AttendancePhotoDialog from '../components/AttendancePhotoDialog';
 import theme from '../theme/professionalTheme';
 import NotificationBell from '../components/NotificationBell';
@@ -722,7 +723,7 @@ export default function ParentDashboardPage() {
                         <Typography variant="body2" sx={{ color: '#6d4c41', mt: 0.25 }}>
                           {alert.student_name}'s attendance rate is <strong>{alert.attendance_rate}%</strong> this month,
                           below the required <strong>{alert.threshold}%</strong> threshold.
-                          Please contact Iponan National High School.
+                          Please contact Lapasan National High School.
                         </Typography>
                       </Box>
                       <Tooltip title="Dismiss this alert">
@@ -781,7 +782,7 @@ export default function ParentDashboardPage() {
                             fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           }}
                         >
-                          {selected.grade} — Section {selected.section} · Iponan National High School
+                          {selected.grade} — Section {selected.section} · Lapasan National High School
                         </Typography>
                       </Box>
                       <Chip

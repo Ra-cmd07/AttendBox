@@ -525,7 +525,7 @@ function SchoolSettingsPanel() {
                 fullWidth 
                 value={form.school_name}
                 onChange={e => setForm(f => ({ ...f, school_name: e.target.value }))}
-                placeholder="e.g. Iponan National High School"
+                placeholder="e.g. Lapasan National High School"
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />

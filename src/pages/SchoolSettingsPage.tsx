@@ -182,7 +182,7 @@ export default function SchoolSettingsPage() {
                 fullWidth 
                 value={schoolInfo.school_name}
                 onChange={e => setSchoolInfo(f => ({ ...f, school_name: e.target.value }))}
-                placeholder="e.g. Iponan National High School"
+                placeholder="e.g. Lapasan National High School"
               />
             </Grid>
             <Grid item xs={12} sm={4}>
