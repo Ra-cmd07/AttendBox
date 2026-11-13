@@ -478,6 +478,16 @@ export default function BLEPositioningMap({
     setFloorPlanUrl(null);
   };
 
+  // NEW: Manual trigger to open Library floors
+  const handleQuickAccessLibrary = () => {
+    const library = buildings.find(b => b.name === 'Library');
+    if (library) {
+      setSelectedBuilding(library);
+    } else {
+      console.warn('Library building not found in buildings array:', buildings);
+    }
+  };
+
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 500, bgcolor: 'transparent' }}>
       {/* Embedded map from trilateration server */}

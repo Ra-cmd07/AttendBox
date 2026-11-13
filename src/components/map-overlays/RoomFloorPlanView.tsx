@@ -342,18 +342,13 @@ export default function RoomFloorPlanView({
                       }
                       arrow
                     >
-                      <Avatar
+                      {/* PIN MARKER instead of circle avatar */}
+                      <Box
                         sx={{
-                          width: 36,
-                          height: 36,
-                          bgcolor: color,
-                          border: isNewlyAdded ? '4px solid #4caf50' : '3px solid white',
-                          boxShadow: isNewlyAdded 
-                            ? '0 0 20px rgba(76, 175, 80, 0.8), 0 2px 8px rgba(0,0,0,0.2)' 
-                            : '0 2px 8px rgba(0,0,0,0.2)',
+                          position: 'relative',
+                          width: 32,
+                          height: 42,
                           cursor: 'pointer',
-                          fontSize: '0.9rem',
-                          fontWeight: 700,
                           transition: 'all 0.3s ease',
                           animation: isNewlyAdded ? 'pulse 1s ease-in-out 2' : 'none',
                           '@keyframes pulse': {
@@ -370,8 +365,26 @@ export default function RoomFloorPlanView({
                           },
                         }}
                       >
-                        {student.student_name.charAt(0)}
-                      </Avatar>
+                        {/* Pin SVG */}
+                        <svg 
+                          width="32" 
+                          height="42" 
+                          viewBox="0 0 32 42" 
+                          style={{
+                            filter: isNewlyAdded 
+                              ? 'drop-shadow(0 0 8px rgba(76, 175, 80, 0.8))' 
+                              : 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                          }}
+                        >
+                          <path 
+                            d="M16 0C7.2 0 0 7.2 0 16c0 8.8 16 26 16 26s16-17.2 16-26c0-8.8-7.2-16-16-16z" 
+                            fill={color}
+                            stroke={isNewlyAdded ? '#4caf50' : '#fff'}
+                            strokeWidth={isNewlyAdded ? '3' : '2'}
+                          />
+                          <circle cx="16" cy="16" r="6" fill="#fff"/>
+                        </svg>
+                      </Box>
                     </Tooltip>
 
                     {/* Distance Badge - Always visible below avatar */}
