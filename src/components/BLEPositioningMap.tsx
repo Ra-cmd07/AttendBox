@@ -382,28 +382,58 @@ export default function BLEPositioningMap({
         // Map positions to student format expected by floor plan
         const filteredStudents = positions
           .filter(pos => {
-            // Use nearest anchor distance instead of accuracy
-            const nearestDistance = pos.anchors && pos.anchors.length > 0
-              ? Math.min(...pos.anchors.map(a => a.distance))
-              : pos.accuracy_m; // Fallback to accuracy if no anchor data
+            // Find nearest anchor
+            if (!pos.anchors || pos.anchors.length === 0) {
+              console.log(`⚠️ ${pos.target_name} has no anchor data - skipping`);
+              return false;
+            }
+            
+            const nearestAnchor = pos.anchors.reduce((nearest, anchor) => 
+              anchor.distance < nearest.distance ? anchor : nearest
+            );
+            
+            const nearestDistance = nearestAnchor.distance;
+            const nearestAnchorId = nearestAnchor.id;
+            
+            // Map anchor IDs to building names
+            const anchorBuildingMap: {[key: number]: string} = {
+              1: 'Classroom',
+              2: 'Cafeteria',
+              3: 'Library'
+            };
+            
+            const studentBuilding = anchorBuildingMap[nearestAnchorId] || 'Unknown';
             
             console.log('🎯 Checking position:', {
               name: pos.target_name,
+              nearestAnchor: nearestAnchorId,
               nearestAnchorDistance: nearestDistance.toFixed(2),
-              accuracy: pos.accuracy_m,
+              studentBuilding: studentBuilding,
+              selectedRoom: selectedRoom.name,
               id: pos.target_id
             });
             
-            // Filter by distance - only show students within classroom range
+            // CRITICAL FIX: Only show students whose nearest anchor matches the current room's building
+            // For now, since we only have "Library" in database, show students near Anchor 3 (Library)
+            // TODO: When Classroom and Cafeteria are added to database, update this logic
+            const isCorrectBuilding = nearestAnchorId === 3; // Only show students near Library anchor (ID 3)
+            
+            if (!isCorrectBuilding) {
+              console.log(`🚫 ${pos.target_name} is nearest to ${studentBuilding} (not Library) - removed from this room`);
+              return false;
+            }
+            
+            // Distance threshold for classroom presence (in meters)
+            const CLASSROOM_DISTANCE_THRESHOLD = 3.0;
             const isInRange = nearestDistance <= CLASSROOM_DISTANCE_THRESHOLD;
             
             if (!isInRange) {
-              console.log(`🚪 ${pos.target_name} is OUT OF RANGE (${nearestDistance.toFixed(1)}m > ${CLASSROOM_DISTANCE_THRESHOLD}m) - removed from floor plan`);
-            } else {
-              console.log(`✅ ${pos.target_name} is IN RANGE (${nearestDistance.toFixed(1)}m) - will show on floor plan`);
+              console.log(`🚪 ${pos.target_name} is OUT OF RANGE (${nearestDistance.toFixed(1)}m > ${CLASSROOM_DISTANCE_THRESHOLD}m)`);
+              return false;
             }
             
-            return isInRange;
+            console.log(`✅ ${pos.target_name} is IN LIBRARY RANGE (${nearestDistance.toFixed(1)}m from Anchor 3)`);
+            return true;
           })
           .map(pos => {
             const nearestDistance = pos.anchors && pos.anchors.length > 0
