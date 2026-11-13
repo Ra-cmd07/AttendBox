@@ -782,7 +782,7 @@ export default function ParentDashboardPage() {
                             fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           }}
                         >
-                          {selected.grade} — Section {selected.section} · Lapasan National High School
+                          {selected.grade} — Section {selected.section} · Lapasan National High School {/* Updated Nov 13, 2026 */}
                         </Typography>
                       </Box>
                       <Chip
