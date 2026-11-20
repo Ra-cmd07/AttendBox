@@ -521,18 +521,52 @@ export default function BLEPositioningMap({
   return (
     <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 500, bgcolor: 'transparent' }}>
       {/* Embedded map from trilateration server */}
-      <iframe
-        ref={iframeRef}
-        src={`${trilaterationServerUrl}${filterStudentName ? `?filter=${encodeURIComponent(filterStudentName)}` : ''}`}
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          borderRadius: theme.borderRadius.base,
-          pointerEvents: (selectedBuilding || selectedFloor || selectedRoom) ? 'none' : 'auto',
-        }}
-        title="BLE Positioning Map"
-      />
+      {error || !connected ? (
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: '#f8fafc',
+            borderRadius: theme.borderRadius.base,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            📡 Trilateration Server Not Connected
+          </Typography>
+          <Typography variant="body2" color="text.secondary" textAlign="center" maxWidth={600}>
+            The BLE trilateration server is not responding. Make sure the trilateration server is running.
+          </Typography>
+          <Typography variant="caption" color="text.secondary" mt={2}>
+            Expected URL: {trilaterationServerUrl}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={connect}
+            sx={{ mt: 2 }}
+          >
+            Retry Connection
+          </Button>
+        </Box>
+      ) : (
+        <iframe
+          ref={iframeRef}
+          src={`${trilaterationServerUrl}${filterStudentName ? `?filter=${encodeURIComponent(filterStudentName)}` : ''}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            borderRadius: theme.borderRadius.base,
+            pointerEvents: (selectedBuilding || selectedFloor || selectedRoom) ? 'none' : 'auto',
+          }}
+          title="BLE Positioning Map"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+        />
+      )}
 
       {/* Connection Status Overlay */}
       <Paper
