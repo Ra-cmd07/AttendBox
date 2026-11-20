@@ -308,64 +308,74 @@ export default function KioskPage() {
     rfidPollingRef.current = pollInterval;
   };
 
-  // ── Start BLE Polling (WiFi-based, continuous like QR code) ───────────
-  const startBLEPolling = () => {
-    console.log('🔵 Starting BLE continuous polling...');
-    console.log('   Mode: Keep scanning until BLE device detected');
-    console.log('   Similar to QR code - waits indefinitely');
+  // ── Start BLE Scan (Single scan per button click) ────────────────────
+  const startBLEScan = async () => {
+    console.log('🔵 Starting BLE single scan...');
+    console.log('   Mode: One scan per button click (like QR/RFID)');
     
-    // Start continuous polling (like QR code)
-    const pollInterval = setInterval(() => {
-      console.log('📡 Checking for BLE device...');
+    setScanState('scanning');
+    
+    try {
+      console.log('📡 Calling backend for BLE scan...');
       
-      api.post('/attendance/scan-ble', {
+      const response = await api.post('/attendance/scan-ble', {
         kiosk_id: KIOSK_ID
-      }).then(response => {
-        const data = response.data;
-        
-        console.log('✅ BLE scan response:', data);
-        
-        if (data.success) {
-          // Found student! Stop polling
-          clearInterval(pollInterval);
-          
-          // Allow unlimited scans - no duplicate check
-          setScanState('processing');
-          
-          // Capture photo
-          const screenshot = webcamRef.current?.getScreenshot();
-          const b64 = screenshot ? screenshot.split(',')[1] : null;
-          setCapturedB64(b64);
-          
-          // Show success
-          setResult({
-            identifier: data.student_id.toString(),
-            student_name: data.student_name,
-            status: 'Partial',
-            session: 'Pending Approval',
-          });
-          setScanState('success');
-          
-          console.log(`✅ ${data.message}`);
-        }
-      }).catch(err => {
-        // Don't show error - just keep scanning silently
-        // Only log to console for debugging
-        console.log('📡 No BLE device detected, retrying...');
       });
-    }, 2000); // Check every 2 seconds
-    
-    // Store interval ref for cleanup
-    scanIntervalRef.current = pollInterval;
+      
+      const data = response.data;
+      console.log('✅ BLE scan response:', data);
+      
+      if (data.success) {
+        // Found student!
+        console.log(`✅ Student detected: ${data.student_name}`);
+        console.log(`   Status: ${data.attendance_status}`);
+        
+        setScanState('processing');
+        
+        // Capture photo
+        const screenshot = webcamRef.current?.getScreenshot();
+        const b64 = screenshot ? screenshot.split(',')[1] : null;
+        setCapturedB64(b64);
+        
+        // Show success with attendance status
+        setResult({
+          identifier: data.student_id.toString(),
+          student_name: data.student_name,
+          status: data.attendance_status || 'Partial', // Show Time-In, Late, or Time-Out
+          session: 'Pending Approval',
+        });
+        setScanState('success');
+        
+        console.log(`✅ ${data.message}`);
+      } else {
+        // No student found
+        console.log('❌ No BLE token detected');
+        setErrorMsg('No BLE token detected. Please bring device closer.');
+        setScanState('error');
+      }
+    } catch (err: any) {
+      console.error('❌ BLE scan error:', err);
+      if (err.response?.status === 404) {
+        setErrorMsg('No BLE token detected. Please bring device closer.');
+      } else {
+        setErrorMsg(err.response?.data?.error || 'Failed to scan for BLE device');
+      }
+      setScanState('error');
+    }
   };
 
   // ── Stop BLE Polling ──────────────────────────────────────────────────
   const stopBLEPolling = () => {
     if (scanIntervalRef.current) {
+      console.log('🛑 Stopping BLE polling, interval ID:', scanIntervalRef.current);
       clearInterval(scanIntervalRef.current);
       scanIntervalRef.current = null;
+      console.log('✅ BLE polling stopped successfully');
     }
   };
+
+  // Note: BLE now uses single-scan mode, not polling
+  // stopBLEPolling is kept for compatibility but won't be used
 
   // ── Approve BLE Detection ─────────────────────────────────────────────
   const handleApproveBLE = useCallback(async () => {
@@ -640,13 +650,12 @@ export default function KioskPage() {
       startRFIDPolling();
       // Keyboard RFID will also auto-approve (see keyboard listener)
     } else if (scanMethod === 'BLE') {
-      console.log('🔵 BLE mode - Web Kiosk Direct Scan');
-      console.log('   Calling ESP32 directly via backend');
-      setScanState('scanning');
-      // Call new BLE scan endpoint (no polling needed!)
-      startBLEPolling();
+      console.log('🔵 BLE mode - Web Kiosk Single Scan');
+      console.log('   One scan per button click (like RFID/QR)');
+      // Call single BLE scan (not continuous polling)
+      startBLEScan();
     }
-  }, [scanState, handleConfirm, startRFIDPolling, startBLEPolling]);
+  }, [scanState, handleConfirm, startRFIDPolling, startBLEScan]);
 
   useEffect(() => {
     return () => {
@@ -1182,6 +1191,8 @@ export default function KioskPage() {
                       ? theme.colors.status.success.main 
                       : result.status === 'Late'
                       ? '#f59e0b'
+                      : result.status === 'Time-Out'
+                      ? '#3b82f6' // Blue for Time-Out
                       : theme.colors.status.error.main,
                     color: '#fff',
                     px: 3,
