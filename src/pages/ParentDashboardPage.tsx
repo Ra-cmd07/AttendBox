@@ -22,7 +22,7 @@ import theme from '../theme/professionalTheme';
 import NotificationBell from '../components/NotificationBell';
 import useWebSocket from '../hooks/useWebSocket';
 
-type Tab = 'overview' | 'attendance' | 'location' | 'sms' | 'messages' | 'excuse';
+type Tab = 'overview' | 'attendance' | 'location' | 'sms' | 'messages' | 'excuse' | 'excuse-status';
 
 export default function ParentDashboardPage() {
   const { user, logout } = useAuth();
@@ -77,6 +77,10 @@ export default function ParentDashboardPage() {
     error: '',
     success: '',
   });
+
+  // Excuse requests history state
+  const [excuseRequests, setExcuseRequests] = useState<any[]>([]);
+  const [excuseRequestsLoading, setExcuseRequestsLoading] = useState(false);
 
   const showSnack = (msg: string, sev: any = 'info') => setSnack({ open: true, msg, sev });
 
@@ -359,9 +363,30 @@ export default function ParentDashboardPage() {
     } catch { /* silent */ }
   }, []);
 
+  // Fetch excuse requests history
+  const fetchExcuseRequests = useCallback(async () => {
+    setExcuseRequestsLoading(true);
+    try {
+      const { data } = await api.get('/excuse/parent');
+      setExcuseRequests(data || []);
+    } catch (err) {
+      console.error('Failed to fetch excuse requests:', err);
+      showSnack('Failed to load excuse requests', 'error');
+    } finally {
+      setExcuseRequestsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (selected) fetchParentAlerts();
   }, [selected, fetchParentAlerts]);
+
+  // Fetch excuse requests when tab is opened
+  useEffect(() => {
+    if (tab === 'excuse-status') {
+      fetchExcuseRequests();
+    }
+  }, [tab, fetchExcuseRequests]);
 
   const handleMarkMsgRead = async (msgId: number) => {
     setOpenMsgId(msgId);
@@ -386,6 +411,8 @@ export default function ParentDashboardPage() {
         ...f, loading: false, reason: '',
         success: `✅ Excuse submitted for ${selected.name} on ${new Date(excuseForm.date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}. The teacher will review it.`,
       }));
+      // Refresh excuse requests list if on that tab
+      fetchExcuseRequests();
     } catch (err: any) {
       setExcuseForm(f => ({
         ...f, loading: false,
@@ -403,12 +430,13 @@ export default function ParentDashboardPage() {
   );
 
   const NAV = [
-    { id: 'overview',    label: 'Overview',        icon: <DashboardIcon /> },
-    { id: 'attendance',  label: 'Attendance log',  icon: <CalendarToday /> },
-    { id: 'excuse',      label: 'Submit Excuse',   icon: <EventNote /> },
-    { id: 'location',    label: 'Location',        icon: <LocationOn /> },
-    { id: 'sms',         label: 'SMS history',     icon: <SmsIcon /> },
-    { id: 'messages',    label: 'Messages',        icon: <SmsIcon /> },
+    { id: 'overview',       label: 'Overview',        icon: <DashboardIcon /> },
+    { id: 'attendance',     label: 'Attendance log',  icon: <CalendarToday /> },
+    { id: 'excuse',         label: 'Submit Excuse',   icon: <EventNote /> },
+    { id: 'excuse-status',  label: 'Excuse Status',   icon: <CheckCircle /> },
+    { id: 'location',       label: 'Location',        icon: <LocationOn /> },
+    { id: 'sms',            label: 'SMS history',     icon: <SmsIcon /> },
+    { id: 'messages',       label: 'Messages',        icon: <SmsIcon /> },
   ];
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -1675,6 +1703,170 @@ export default function ParentDashboardPage() {
                     </Box>
                   </Paper>
                 </Box>
+              )}
+
+              {/* ── Excuse Status Tab ── */}
+              {tab === 'excuse-status' && (
+                <Paper elevation={2} sx={{ borderRadius: 2, bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
+                  {/* Header */}
+                  <Box sx={{ 
+                    p: 2.5, 
+                    background: theme.colors.primary.gradient,
+                    color: '#fff',
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center' 
+                  }}>
+                    <Box>
+                      <Typography sx={{ 
+                        fontFamily: theme.typography.fontFamily.display, 
+                        fontWeight: 700, 
+                        fontSize: 18 
+                      }}>
+                        📋 Excuse Request Status
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mt: 0.25 }}>
+                        View all submitted excuse requests and teacher responses
+                      </Typography>
+                    </Box>
+                    <Button
+                      size="small"
+                      onClick={fetchExcuseRequests}
+                      disabled={excuseRequestsLoading}
+                      sx={{ 
+                        color: '#fff', 
+                        borderColor: 'rgba(255,255,255,0.5)',
+                        '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
+                        textTransform: 'none',
+                        fontWeight: 600,
+                      }}
+                      variant="outlined"
+                    >
+                      {excuseRequestsLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Refresh'}
+                    </Button>
+                  </Box>
+
+                  {/* Content */}
+                  <Box sx={{ p: 3 }}>
+                    {excuseRequestsLoading ? (
+                      <Box textAlign="center" py={6}>
+                        <CircularProgress size={40} />
+                        <Typography variant="body2" color="text.secondary" mt={2}>
+                          Loading excuse requests...
+                        </Typography>
+                      </Box>
+                    ) : excuseRequests.length === 0 ? (
+                      <Box textAlign="center" py={6}>
+                        <EventNote sx={{ fontSize: 64, color: '#ddd', mb: 2 }} />
+                        <Typography color="#666" fontSize="1rem" fontWeight={600}>
+                          No excuse requests submitted yet
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" mt={1}>
+                          Submit an excuse request from the "Submit Excuse" tab
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Student</TableCell>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Date</TableCell>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Reason</TableCell>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Status</TableCell>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Teacher Note</TableCell>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Reviewed By</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {excuseRequests.map((req) => {
+                              const statusColor = 
+                                req.status === 'approved' ? theme.colors.status.success.main :
+                                req.status === 'rejected' ? theme.colors.status.error.main :
+                                theme.colors.status.warning.main;
+                              
+                              const statusLabel = 
+                                req.status === 'approved' ? '✅ Approved' :
+                                req.status === 'rejected' ? '❌ Rejected' :
+                                '⏳ Pending';
+
+                              return (
+                                <TableRow 
+                                  key={req.id} 
+                                  hover
+                                  sx={{ 
+                                    bgcolor: req.status === 'pending' ? '#fffde7' : '#fff',
+                                    '&:hover': { bgcolor: '#f5f7fa' } 
+                                  }}
+                                >
+                                  <TableCell sx={{ color: '#1a1a1a', fontWeight: 600 }}>
+                                    {req.student_name}
+                                  </TableCell>
+                                  <TableCell sx={{ color: '#1a1a1a', whiteSpace: 'nowrap' }}>
+                                    {req.date ? format(new Date(req.date + 'T12:00:00'), 'MMM d, yyyy') : '—'}
+                                  </TableCell>
+                                  <TableCell sx={{ color: '#555', maxWidth: 250 }}>
+                                    <Typography 
+                                      variant="body2" 
+                                      sx={{ 
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                      }}
+                                    >
+                                      {req.reason || '—'}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Chip 
+                                      label={statusLabel}
+                                      size="small"
+                                      sx={{ 
+                                        bgcolor: statusColor,
+                                        color: '#fff',
+                                        fontWeight: 600,
+                                        fontSize: '0.7rem',
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell sx={{ maxWidth: 250 }}>
+                                    {req.teacher_note ? (
+                                      <Tooltip title={req.teacher_note} arrow>
+                                        <Typography 
+                                          variant="body2" 
+                                          sx={{ 
+                                            color: '#e65100',
+                                            fontStyle: 'italic',
+                                            fontWeight: 600,
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            cursor: 'help',
+                                          }}
+                                        >
+                                          📝 {req.teacher_note}
+                                        </Typography>
+                                      </Tooltip>
+                                    ) : (
+                                      <Typography variant="body2" sx={{ color: '#999' }}>—</Typography>
+                                    )}
+                                  </TableCell>
+                                  <TableCell sx={{ color: '#555', fontSize: '0.85rem' }}>
+                                    {req.teacher_name || '—'}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                  </Box>
+                </Paper>
               )}
 
             </>
