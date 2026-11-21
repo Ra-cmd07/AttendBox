@@ -1916,56 +1916,7 @@ export default function TeacherDashboardPageNew() {
             </Grid>
           </Grid>
 
-          {/* Quick Actions */}
-          <Paper sx={{ p: 2.5, mb: 3, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <ClassIcon sx={{ color: theme.colors.primary.main }} />
-              Quick Actions
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setManualAttendanceOpen(true)}
-                  sx={{
-                    py: 1.5,
-                    ...theme.components.button.primary,
-                    '&:hover': theme.components.button.primary.hover,
-                  }}
-                >
-                  Mark Manual Attendance
-                </Button>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  startIcon={<EventAvailable />}
-                  onClick={() => setExcuseAbsenceOpen(true)}
-                  sx={{
-                    py: 1.5,
-                    bgcolor: theme.colors.status.warning.main,
-                    '&:hover': { bgcolor: theme.colors.status.warning.dark },
-                  }}
-                >
-                  Excuse Absence
-                </Button>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  startIcon={<TrendingUp />}
-                  onClick={() => navigate('/teacher/reports')}
-                  sx={{ py: 1.5 }}
-                >
-                  View Reports
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
+          {/* Quick Actions section removed - functionality preserved in dialogs */}
 
           {/* ── ADVISORY: Automated Partial Attendance List (Full Roster) ── */}
           <Paper sx={{ mb: 3, borderRadius: 2, overflow: 'hidden' }}>
