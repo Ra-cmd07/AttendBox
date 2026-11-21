@@ -73,6 +73,8 @@ export default function ParentDashboardPage() {
   const [excuseForm, setExcuseForm] = useState({
     date: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().split('T')[0], // PH today
     reason: '',
+    document: null as File | null,
+    documentPreview: null as string | null,
     loading: false,
     error: '',
     success: '',
@@ -81,6 +83,13 @@ export default function ParentDashboardPage() {
   // Excuse requests history state
   const [excuseRequests, setExcuseRequests] = useState<any[]>([]);
   const [excuseRequestsLoading, setExcuseRequestsLoading] = useState(false);
+
+  // Document viewer dialog state
+  const [documentDialog, setDocumentDialog] = useState({
+    open: false,
+    url: null as string | null,
+    fileName: '',
+  });
 
   const showSnack = (msg: string, sev: any = 'info') => setSnack({ open: true, msg, sev });
 
@@ -398,17 +407,34 @@ export default function ParentDashboardPage() {
   };
 
   const handleStandaloneExcuse = async () => {
-    if (!excuseForm.date || !excuseForm.reason.trim() || !selected) return;
+    if (!excuseForm.date || !excuseForm.reason.trim() || !selected) {
+      setExcuseForm(f => ({ ...f, error: 'Please fill all required fields' }));
+      return;
+    }
+    if (!excuseForm.document) {
+      setExcuseForm(f => ({ ...f, error: 'Please upload a medical certificate or supporting document' }));
+      return;
+    }
+
     setExcuseForm(f => ({ ...f, loading: true, error: '', success: '' }));
     try {
-      await api.post('/excuse/parent', {
-        student_id: selected.id,
-        date:       excuseForm.date,
-        reason:     excuseForm.reason.trim(),
-        // no attendance_id — this is for a fully absent day with no record
+      // Create FormData to send file
+      const formData = new FormData();
+      formData.append('student_id', String(selected.id));
+      formData.append('date', excuseForm.date);
+      formData.append('reason', excuseForm.reason.trim());
+      formData.append('document', excuseForm.document);
+
+      await api.post('/excuse/parent', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
+
       setExcuseForm(f => ({
-        ...f, loading: false, reason: '',
+        ...f, 
+        loading: false, 
+        reason: '',
+        document: null,
+        documentPreview: null,
         success: `✅ Excuse submitted for ${selected.name} on ${new Date(excuseForm.date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}. The teacher will review it.`,
       }));
       // Refresh excuse requests list if on that tab
@@ -1679,12 +1705,191 @@ export default function ParentDashboardPage() {
                         The teacher will be notified and can approve or reject this request.
                       </Typography>
 
+                      {/* Document Upload */}
+                      <Box sx={{ mb: 2.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: '#e65100' }}>
+                          📎 Medical Certificate or Supporting Document *
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                          Upload a photo of the medical certificate, doctor's note, or other supporting document (JPG, PNG, or PDF, max 10MB)
+                        </Typography>
+
+                        {/* File Preview */}
+                        {excuseForm.documentPreview && (
+                          <Box sx={{
+                            mb: 2,
+                            p: 2,
+                            border: '2px solid #4caf50',
+                            borderRadius: 2,
+                            bgcolor: '#f1f8f4',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2,
+                          }}>
+                            {excuseForm.document?.type === 'application/pdf' ? (
+                              <Box sx={{
+                                width: 60,
+                                height: 60,
+                                bgcolor: '#d32f2f',
+                                borderRadius: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: '1.2rem',
+                              }}>
+                                PDF
+                              </Box>
+                            ) : (
+                              <Box
+                                component="img"
+                                src={excuseForm.documentPreview}
+                                sx={{
+                                  width: 60,
+                                  height: 60,
+                                  objectFit: 'cover',
+                                  borderRadius: 1,
+                                  border: '1px solid #ddd',
+                                }}
+                              />
+                            )}
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                                ✓ {excuseForm.document?.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {excuseForm.document && (excuseForm.document.size / 1024 / 1024).toFixed(2)} MB
+                              </Typography>
+                            </Box>
+                            <IconButton
+                              size="small"
+                              onClick={() => setExcuseForm(f => ({ ...f, document: null, documentPreview: null }))}
+                              sx={{ color: '#d32f2f' }}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </Box>
+                        )}
+
+                        {/* Upload Buttons */}
+                        {!excuseForm.document && (
+                          <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+                            {/* File Upload */}
+                            <Button
+                              variant="outlined"
+                              component="label"
+                              fullWidth
+                              sx={{
+                                py: 1.5,
+                                borderColor: theme.colors.primary.main,
+                                color: theme.colors.primary.main,
+                                '&:hover': { borderColor: theme.colors.primary.dark, bgcolor: '#f5f7fa' },
+                                textTransform: 'none',
+                                fontWeight: 600,
+                              }}
+                            >
+                              📁 Choose File
+                              <input
+                                type="file"
+                                hidden
+                                accept="image/jpeg,image/jpg,image/png,application/pdf"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+
+                                  // Check file size
+                                  if (file.size > 10 * 1024 * 1024) {
+                                    setExcuseForm(f => ({ ...f, error: 'File size must be less than 10MB' }));
+                                    return;
+                                  }
+
+                                  // Check file type
+                                  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+                                  if (!allowedTypes.includes(file.type)) {
+                                    setExcuseForm(f => ({ ...f, error: 'Only JPG, PNG, and PDF files are allowed' }));
+                                    return;
+                                  }
+
+                                  // Create preview
+                                  if (file.type.startsWith('image/')) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      setExcuseForm(f => ({ 
+                                        ...f, 
+                                        document: file,
+                                        documentPreview: reader.result as string,
+                                        error: '',
+                                      }));
+                                    };
+                                    reader.readAsDataURL(file);
+                                  } else {
+                                    // PDF - no preview
+                                    setExcuseForm(f => ({ 
+                                      ...f, 
+                                      document: file,
+                                      documentPreview: 'pdf',
+                                      error: '',
+                                    }));
+                                  }
+                                }}
+                              />
+                            </Button>
+
+                            {/* Camera Capture */}
+                            <Button
+                              variant="outlined"
+                              component="label"
+                              fullWidth
+                              sx={{
+                                py: 1.5,
+                                borderColor: theme.colors.secondary.main,
+                                color: theme.colors.secondary.main,
+                                '&:hover': { borderColor: theme.colors.secondary.dark, bgcolor: '#f5f7fa' },
+                                textTransform: 'none',
+                                fontWeight: 600,
+                              }}
+                            >
+                              📷 Take Photo
+                              <input
+                                type="file"
+                                hidden
+                                accept="image/*"
+                                capture="environment"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+
+                                  // Check file size
+                                  if (file.size > 10 * 1024 * 1024) {
+                                    setExcuseForm(f => ({ ...f, error: 'File size must be less than 10MB' }));
+                                    return;
+                                  }
+
+                                  // Create preview
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setExcuseForm(f => ({ 
+                                      ...f, 
+                                      document: file,
+                                      documentPreview: reader.result as string,
+                                      error: '',
+                                    }));
+                                  };
+                                  reader.readAsDataURL(file);
+                                }}
+                              />
+                            </Button>
+                          </Box>
+                        )}
+                      </Box>
+
                       {/* Submit button */}
                       <Button
                         fullWidth
                         variant="contained"
                         size="large"
-                        disabled={excuseForm.loading || !excuseForm.date || !excuseForm.reason.trim()}
+                        disabled={excuseForm.loading || !excuseForm.date || !excuseForm.reason.trim() || !excuseForm.document}
                         onClick={handleStandaloneExcuse}
                         sx={{
                           bgcolor: theme.colors.status.warning.main,
@@ -1774,6 +1979,7 @@ export default function ParentDashboardPage() {
                               <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Date</TableCell>
                               <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Reason</TableCell>
                               <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Status</TableCell>
+                              <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Attachment</TableCell>
                               <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Teacher Note</TableCell>
                               <TableCell sx={{ fontWeight: 700, color: '#555', fontSize: '0.8rem' }}>Reviewed By</TableCell>
                             </TableRow>
@@ -1830,6 +2036,31 @@ export default function ParentDashboardPage() {
                                         fontSize: '0.7rem',
                                       }}
                                     />
+                                  </TableCell>
+                                  <TableCell>
+                                    {req.document_path ? (
+                                      <Button
+                                        size="small"
+                                        variant="text"
+                                        startIcon={<PhotoCamera />}
+                                        onClick={() => setDocumentDialog({
+                                          open: true,
+                                          url: req.document_path,
+                                          fileName: `Excuse_${req.student_name}_${req.date}`,
+                                        })}
+                                        sx={{
+                                          textTransform: 'none',
+                                          color: theme.colors.primary.main,
+                                          fontWeight: 600,
+                                          fontSize: '0.75rem',
+                                          '&:hover': { bgcolor: '#f5f7fa' },
+                                        }}
+                                      >
+                                        View
+                                      </Button>
+                                    ) : (
+                                      <Typography variant="body2" sx={{ color: '#999' }}>—</Typography>
+                                    )}
                                   </TableCell>
                                   <TableCell sx={{ maxWidth: 250 }}>
                                     {req.teacher_note ? (
@@ -2001,6 +2232,95 @@ export default function ParentDashboardPage() {
         timestamp={photoDialog.timestamp}
         method={photoDialog.method}
       />
+
+      {/* Document Viewer Dialog */}
+      <Dialog
+        open={documentDialog.open}
+        onClose={() => setDocumentDialog({ open: false, url: null, fileName: '' })}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{
+          background: theme.colors.primary.gradient,
+          color: '#fff',
+          fontFamily: theme.typography.fontFamily.display,
+          fontWeight: theme.typography.fontWeight.bold,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          📎 Supporting Document
+          <IconButton
+            onClick={() => setDocumentDialog({ open: false, url: null, fileName: '' })}
+            sx={{ color: '#fff' }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, bgcolor: '#f5f5f5' }}>
+          {documentDialog.url && (
+            documentDialog.url.endsWith('.pdf') || documentDialog.url.includes('/raw/upload/') ? (
+              // PDF viewer
+              <Box sx={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 4 }}>
+                <PhotoCamera sx={{ fontSize: 64, color: '#d32f2f', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" mb={2}>
+                  PDF Document
+                </Typography>
+                <Button
+                  variant="contained"
+                  href={documentDialog.url}
+                  target="_blank"
+                  download={documentDialog.fileName}
+                  sx={{
+                    bgcolor: theme.colors.primary.main,
+                    '&:hover': { bgcolor: theme.colors.primary.dark },
+                    textTransform: 'none',
+                    fontWeight: 700,
+                  }}
+                >
+                  📥 Download PDF
+                </Button>
+              </Box>
+            ) : (
+              // Image viewer
+              <Box
+                component="img"
+                src={documentDialog.url}
+                sx={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '70vh',
+                  objectFit: 'contain',
+                }}
+              />
+            )
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            onClick={() => setDocumentDialog({ open: false, url: null, fileName: '' })}
+            sx={{ textTransform: 'none', color: '#666' }}
+          >
+            Close
+          </Button>
+          {documentDialog.url && !documentDialog.url.endsWith('.pdf') && (
+            <Button
+              variant="contained"
+              href={documentDialog.url}
+              target="_blank"
+              download={documentDialog.fileName}
+              sx={{
+                bgcolor: theme.colors.primary.main,
+                '&:hover': { bgcolor: theme.colors.primary.dark },
+                textTransform: 'none',
+                fontWeight: 700,
+              }}
+            >
+              📥 Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -1043,6 +1043,13 @@ export default function TeacherDashboardPageNew() {
     open: boolean; request: any | null; action: 'approve' | 'reject'; note: string; loading: boolean; error: string;
   }>({ open: false, request: null, action: 'approve', note: '', loading: false, error: '' });
 
+  // Document viewer dialog state
+  const [documentDialog, setDocumentDialog] = useState({
+    open: false,
+    url: null as string | null,
+    fileName: '',
+  });
+
   // Message-parent dialog state (from Final Attendance List)
   const [msgDialog, setMsgDialog] = useState<{
     open: boolean; studentName: string; studentId: number | null;
@@ -1788,7 +1795,7 @@ export default function TeacherDashboardPageNew() {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      {['Student', 'Date', 'Parent', 'Reason', 'Status', 'Actions'].map(h => (
+                      {['Student', 'Date', 'Parent', 'Reason', 'Attachment', 'Status', 'Actions'].map(h => (
                         <TableCell key={h} sx={{ fontWeight: 700, bgcolor: '#fff8e1' }}>{h}</TableCell>
                       ))}
                     </TableRow>
@@ -1796,7 +1803,7 @@ export default function TeacherDashboardPageNew() {
                   <TableBody>
                     {excuseRequests.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 5, color: '#888' }}>
+                        <TableCell colSpan={7} align="center" sx={{ py: 5, color: '#888' }}>
                           No excuse requests found
                         </TableCell>
                       </TableRow>
@@ -1824,6 +1831,31 @@ export default function TeacherDashboardPageNew() {
                             <Typography variant="caption" sx={{ color: '#e65100', display: 'block', mt: 0.5 }}>
                               Note: {req.teacher_note}
                             </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {req.document_path ? (
+                            <Button
+                              size="small"
+                              variant="text"
+                              startIcon={<PhotoCamera />}
+                              onClick={() => setDocumentDialog({
+                                open: true,
+                                url: req.document_path,
+                                fileName: `Excuse_${req.student_name}_${req.date}`,
+                              })}
+                              sx={{
+                                textTransform: 'none',
+                                color: theme.colors.primary.main,
+                                fontWeight: 600,
+                                fontSize: '0.75rem',
+                                '&:hover': { bgcolor: '#f5f7fa' },
+                              }}
+                            >
+                              📎 View
+                            </Button>
+                          ) : (
+                            <Typography variant="caption" sx={{ color: '#999' }}>—</Typography>
                           )}
                         </TableCell>
                         <TableCell>
@@ -2210,7 +2242,7 @@ export default function TeacherDashboardPageNew() {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        {['Student', 'Date', 'Parent', 'Reason', 'Status', 'Actions'].map(h => (
+                        {['Student', 'Date', 'Parent', 'Reason', 'Attachment', 'Status', 'Actions'].map(h => (
                           <TableCell key={h} sx={{ fontWeight: 700, bgcolor: '#fff8e1' }}>{h}</TableCell>
                         ))}
                       </TableRow>
@@ -2218,14 +2250,14 @@ export default function TeacherDashboardPageNew() {
                     <TableBody>
                       {subjectExcuseLoading && (
                         <TableRow>
-                          <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                          <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                             <CircularProgress size={24} />
                           </TableCell>
                         </TableRow>
                       )}
                       {!subjectExcuseLoading && subjectExcuseRequests.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={6} align="center" sx={{ py: 5, color: '#888' }}>
+                          <TableCell colSpan={7} align="center" sx={{ py: 5, color: '#888' }}>
                             No excuse requests found
                           </TableCell>
                         </TableRow>
@@ -2256,6 +2288,31 @@ export default function TeacherDashboardPageNew() {
                               <Typography variant="caption" sx={{ color: '#e65100', display: 'block', mt: 0.5 }}>
                                 Note: {req.teacher_note}
                               </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {req.document_path ? (
+                              <Button
+                                size="small"
+                                variant="text"
+                                startIcon={<PhotoCamera />}
+                                onClick={() => setDocumentDialog({
+                                  open: true,
+                                  url: req.document_path,
+                                  fileName: `Excuse_${req.student_name}_${req.date}`,
+                                })}
+                                sx={{
+                                  textTransform: 'none',
+                                  color: theme.colors.primary.main,
+                                  fontWeight: 600,
+                                  fontSize: '0.75rem',
+                                  '&:hover': { bgcolor: '#f5f7fa' },
+                                }}
+                              >
+                                📎 View
+                              </Button>
+                            ) : (
+                              <Typography variant="caption" sx={{ color: '#999' }}>—</Typography>
                             )}
                           </TableCell>
                           <TableCell>
@@ -2755,6 +2812,95 @@ export default function TeacherDashboardPageNew() {
         timestamp={photoDialog.timestamp}
         method={photoDialog.method}
       />
+
+      {/* Document Viewer Dialog */}
+      <Dialog
+        open={documentDialog.open}
+        onClose={() => setDocumentDialog({ open: false, url: null, fileName: '' })}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{
+          background: theme.colors.primary.gradient,
+          color: '#fff',
+          fontFamily: theme.typography.fontFamily.display,
+          fontWeight: theme.typography.fontWeight.bold,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          📎 Supporting Document
+          <IconButton
+            onClick={() => setDocumentDialog({ open: false, url: null, fileName: '' })}
+            sx={{ color: '#fff' }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, bgcolor: '#f5f5f5' }}>
+          {documentDialog.url && (
+            documentDialog.url.endsWith('.pdf') || documentDialog.url.includes('/raw/upload/') ? (
+              // PDF viewer
+              <Box sx={{ height: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 4 }}>
+                <PhotoCamera sx={{ fontSize: 64, color: '#d32f2f', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" mb={2}>
+                  PDF Document
+                </Typography>
+                <Button
+                  variant="contained"
+                  href={documentDialog.url}
+                  target="_blank"
+                  download={documentDialog.fileName}
+                  sx={{
+                    bgcolor: theme.colors.primary.main,
+                    '&:hover': { bgcolor: theme.colors.primary.dark },
+                    textTransform: 'none',
+                    fontWeight: 700,
+                  }}
+                >
+                  📥 Download PDF
+                </Button>
+              </Box>
+            ) : (
+              // Image viewer
+              <Box
+                component="img"
+                src={documentDialog.url}
+                sx={{
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: '70vh',
+                  objectFit: 'contain',
+                }}
+              />
+            )
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            onClick={() => setDocumentDialog({ open: false, url: null, fileName: '' })}
+            sx={{ textTransform: 'none', color: '#666' }}
+          >
+            Close
+          </Button>
+          {documentDialog.url && !documentDialog.url.endsWith('.pdf') && (
+            <Button
+              variant="contained"
+              href={documentDialog.url}
+              target="_blank"
+              download={documentDialog.fileName}
+              sx={{
+                bgcolor: theme.colors.primary.main,
+                '&:hover': { bgcolor: theme.colors.primary.dark },
+                textTransform: 'none',
+                fontWeight: 700,
+              }}
+            >
+              📥 Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
 
       {/* School ID Generator Modal */}
       {showIDModal && teacherData?.section && (
