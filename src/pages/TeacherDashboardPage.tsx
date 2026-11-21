@@ -12,7 +12,7 @@ import {
   CheckCircle, Cancel, AccessTime, People, School,
   Edit, Logout, Refresh, Dashboard, Add, Note, EventAvailable,
   TrendingUp, Class as ClassIcon, Menu as MenuIcon, PhotoCamera, Email, Description,
-  Person, Badge as BadgeIcon,
+  Person, Badge as BadgeIcon, Close,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
