@@ -794,18 +794,18 @@ function AssignmentsPage() {
       {/* Page header */}
       <Box
         display="flex"
-        flexDirection={{ xs: 'column', sm: 'row' }}
+        flexDirection={{ xs: 'column-reverse', sm: 'row' }}
         justifyContent="space-between"
         alignItems={{ xs: 'flex-start', sm: 'center' }}
         mb={3}
         gap={2}
-        position="relative"
       >
-        <Box>
+        <Box sx={{ order: { xs: 2, sm: 1 } }}>
           <Typography variant="h5" fontWeight={800} color={theme.colors.primary.main}>
             Class Assignment Configuration
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          {/* Description removed for mobile, shown only on desktop */}
+          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
             Manage Year Level / Strand / Track / Section assignments, advisers, subjects, and student groups.
           </Typography>
         </Box>
@@ -814,16 +814,14 @@ function AssignmentsPage() {
           startIcon={<Add />}
           onClick={() => setAddDlg(true)}
           sx={{
+            order: { xs: 1, sm: 2 },
             textTransform: 'none',
             fontWeight: 700,
             whiteSpace: 'nowrap',
-            position: { xs: 'absolute', sm: 'static' },
-            top: { xs: 0, sm: 'auto' },
-            right: { xs: 0, sm: 'auto' },
-            minWidth: { xs: 'auto', sm: 'fit-content' },
+            alignSelf: { xs: 'flex-end', sm: 'auto' },
           }}
         >
-          ➕ Add section &amp; year level
+          Add section &amp; year level
         </Button>
       </Box>
 

@@ -1621,16 +1621,16 @@ export default function AdminDashboardPage() {
           {/* ── Users / Students Tab ── */}
           {(tab === 'users' || tab === 'students') && (
             <Paper elevation={2} sx={{ borderRadius: 2 }}>
-              <Box sx={{ p: 2, borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ p: 2, borderBottom: '1px solid #eee', display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2 }}>
                 <Typography fontWeight={700}>{tab === 'students' ? 'Students' : 'All Users'}</Typography>
-                <Box display="flex" gap={2}>
+                <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={{ xs: 1, sm: 2 }} width={{ xs: '100%', sm: 'auto' }}>
                   {tab === 'students' && (
                     <>
                       <Button 
                         variant="contained" 
                         startIcon={<CreditCard />} 
                         onClick={() => setShowIDGeneratorModal(true)}
-                        sx={{ bgcolor: '#9c27b0', '&:hover': { bgcolor: '#7b1fa2' } }}
+                        sx={{ bgcolor: '#9c27b0', '&:hover': { bgcolor: '#7b1fa2' }, width: { xs: '100%', sm: 'auto' } }}
                       >
                         Generate School IDs
                       </Button>
@@ -1638,13 +1638,13 @@ export default function AdminDashboardPage() {
                         variant="contained" 
                         startIcon={<School />} 
                         onClick={() => navigate('/admin/students/register')}
-                        sx={{ bgcolor: '#2e7d32', '&:hover': { bgcolor: '#1b5e20' } }}
+                        sx={{ bgcolor: '#2e7d32', '&:hover': { bgcolor: '#1b5e20' }, width: { xs: '100%', sm: 'auto' } }}
                       >
                         Register Student
                       </Button>
                     </>
                   )}
-                  <Button variant="contained" startIcon={<PersonAdd />} onClick={() => setCreateOpen(true)}>
+                  <Button variant="contained" startIcon={<PersonAdd />} onClick={() => setCreateOpen(true)} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                     Add User
                   </Button>
                 </Box>
