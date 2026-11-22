@@ -97,7 +97,10 @@ export default function StudentPortalPage() {
               Student Portal
             </Typography>
           </Box>
-          <NotificationBell iconColor="#fff" />
+          {/* Hide notification bell in drawer on mobile, show only in AppBar */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <NotificationBell iconColor="#fff" />
+          </Box>
         </Box>
       </Box>
       <Box sx={{ p: 2.5, flex: 1 }}>

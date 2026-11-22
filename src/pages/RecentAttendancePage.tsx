@@ -179,25 +179,34 @@ export default function RecentAttendancePage() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 600, color: theme.colors.primary.main }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          mb: 3,
+          gap: { xs: 1.5, sm: 2 },
+        }}
+      >
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 600, color: theme.colors.primary.main, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
             Recent Attendance
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Last 7 days • Real-time updates via WebSocket
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', alignSelf: { xs: 'flex-end', sm: 'auto' } }}>
           {lastUpdate && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
               Updated: {lastUpdate.toLocaleTimeString()}
             </Typography>
           )}
-          <Tooltip title="Refresh">
-            <IconButton onClick={fetchAttendance} color="primary">
+          <Tooltip title={`Refresh ${lastUpdate ? `(Last: ${lastUpdate.toLocaleTimeString()})` : ''}`}>
+            <IconButton onClick={fetchAttendance} color="primary" size="small">
               <Refresh />
             </IconButton>
           </Tooltip>
