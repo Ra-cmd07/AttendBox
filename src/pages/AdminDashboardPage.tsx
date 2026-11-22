@@ -211,6 +211,175 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
   );
 }
 
+// ─── EditUserDialog ────────────────────────────────────────────────────
+// Simple dialog for editing user's username, full name, and phone number
+function EditUserDialog({
+  open, user, onClose, onSaved,
+}: {
+  open: boolean; user: any; onClose: () => void; onSaved: () => void;
+}) {
+  const [form, setForm] = useState({
+    username: '',
+    full_name: '',
+    phone: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  // Load user data into form when dialog opens
+  useEffect(() => {
+    if (!open || !user) return;
+    
+    // Fetch full user profile to get current data
+    api.get(`/admin/users/${user.id}`)
+      .then(r => {
+        const profile = r.data?.profile || {};
+        const userData = r.data || {};
+        
+        setForm({
+          username: userData.username || user.username || '',
+          full_name: profile.name || user.name || '',
+          phone: profile.contact || '',
+        });
+      })
+      .catch(() => {
+        // Fallback to user object data
+        setForm({
+          username: user.username || '',
+          full_name: user.name || '',
+          phone: user.contact || '',
+        });
+      });
+  }, [open, user]);
+
+  const handleSave = async () => {
+    // Validation
+    if (!form.username.trim()) {
+      setError('Username is required');
+      return;
+    }
+
+    if (!form.full_name.trim()) {
+      setError('Full name is required');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+    
+    try {
+      // Single API call - backend handles both username and profile updates
+      await api.put(`/admin/users/${user.id}`, {
+        username: form.username.trim(),
+        name: form.full_name.trim(),
+        contact: form.phone.trim() || null,
+      });
+
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      setError(e.response?.data?.error || 'Failed to update user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ bgcolor: '#1976d2', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h6" fontWeight={700}>✏️ Edit User</Typography>
+          <Typography variant="caption" sx={{ opacity: 0.9 }}>
+            {user.username} ({user.role})
+          </Typography>
+        </Box>
+        <IconButton onClick={onClose} sx={{ color: '#fff' }}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      
+      <DialogContent sx={{ pt: 3 }}>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        
+        {/* Role Badge (readonly) */}
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            User Role (cannot be changed)
+          </Typography>
+          <Chip 
+            label={user.role?.toUpperCase() || 'UNKNOWN'} 
+            size="small"
+            sx={{ 
+              bgcolor: user.role === 'admin' ? '#ff9800' : 
+                       user.role === 'teacher' ? '#2196f3' : 
+                       user.role === 'parent' ? '#4caf50' : 
+                       user.role === 'student' ? '#9c27b0' : '#757575',
+              color: '#fff',
+              fontWeight: 700,
+            }}
+          />
+        </Box>
+
+        <Grid container spacing={2}>
+          {/* Username */}
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              label="Username *"
+              fullWidth
+              value={form.username}
+              onChange={e => set('username', e.target.value)}
+              placeholder="Enter username"
+              helperText="Unique identifier for login"
+            />
+          </Grid>
+
+          {/* Full Name */}
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              label="Full Name *"
+              fullWidth
+              value={form.full_name}
+              onChange={e => set('full_name', e.target.value)}
+              placeholder="Enter full name"
+              helperText="Display name for the user"
+            />
+          </Grid>
+
+          {/* Phone Number */}
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              label="Phone Number"
+              fullWidth
+              value={form.phone}
+              onChange={e => set('phone', e.target.value)}
+              placeholder="e.g., 09171234567"
+              helperText="Optional contact number"
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} variant="outlined" disabled={loading}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleSave} 
+          variant="contained" 
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={16} /> : null}
+        >
+          {loading ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 // ─── EditStudentDialog ────────────────────────────────────────────────
 // Allows admin to edit all student fields including SF2 name fields
 function EditStudentDialog({
@@ -815,6 +984,10 @@ export default function AdminDashboardPage() {
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [editOpen,    setEditOpen]    = useState(false);
   const [editUser,    setEditUser]    = useState<any>(null);
+  
+  // Edit user (non-student) dialog state
+  const [editUserOpen, setEditUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
 
   // Attendance alerts state
   const [alerts, setAlerts] = useState<any[]>([]);
@@ -1705,6 +1878,17 @@ export default function AdminDashboardPage() {
                               </Tooltip>
                             </>
                           )}
+                          {tab === 'users' && (
+                            <Tooltip title="Edit User Info">
+                              <IconButton size="small" color="primary"
+                                onClick={() => {
+                                  setEditingUser(u);
+                                  setEditUserOpen(true);
+                                }}>
+                                <Edit />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <Tooltip title={u.is_active ? 'Deactivate' : 'Activate'}>
                             <IconButton size="small" color={u.is_active ? 'error' : 'success'}
                               onClick={() => handleToggleStatus(u.id)}>
@@ -2195,6 +2379,19 @@ export default function AdminDashboardPage() {
           loadUsers();
           setEditOpen(false);
           setEditUser(null);
+        }}
+      />
+
+      {/* Edit User Dialog (for non-students) */}
+      <EditUserDialog
+        open={editUserOpen}
+        user={editingUser}
+        onClose={() => { setEditUserOpen(false); setEditingUser(null); }}
+        onSaved={() => {
+          showSnack('User updated successfully');
+          loadUsers();
+          setEditUserOpen(false);
+          setEditingUser(null);
         }}
       />
 
