@@ -315,8 +315,20 @@ export default function KioskPage() {
     
     setScanState('scanning');
     
-    // Step 1: Capture photo FIRST (before scan)
+    // Step 1: Ensure camera is ready and capture photo FIRST (before scan)
     console.log('📸 Step 1: Capturing photo from webcam...');
+    
+    // Check if camera is ready
+    if (!cameraReady) {
+      console.warn('⚠️ Camera not ready yet, waiting...');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
+    }
+    
+    // Check if webcam ref exists and video is playing
+    if (!webcamRef.current || !webcamRef.current.video || webcamRef.current.video.readyState !== 4) {
+      console.warn('⚠️ Webcam not ready (video not playing)');
+    }
+    
     const screenshot = webcamRef.current?.getScreenshot();
     const b64 = screenshot ? screenshot.split(',')[1] : null;
     setCapturedB64(b64);
@@ -324,6 +336,11 @@ export default function KioskPage() {
     if (b64) {
       console.log('✅ Photo captured successfully!');
       console.log(`📏 Photo size: ${(b64.length / 1024).toFixed(2)} KB`);
+      
+      // Verify it's not a blank/black image (too small)
+      if (b64.length < 1000) {
+        console.warn('⚠️ Photo seems too small (might be blank/black)');
+      }
     } else {
       console.warn('⚠️ No photo captured (camera might not be ready)');
     }
