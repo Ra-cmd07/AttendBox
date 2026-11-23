@@ -151,7 +151,9 @@ export const AttendanceActivityDialog: React.FC<AttendanceActivityDialogProps> =
   const getPhotoUrl = (photoPath?: string) => {
     if (!photoPath) return undefined;
     if (photoPath.startsWith('http')) return photoPath;
-    return `${getApiBaseUrl()}${photoPath}`;
+    // Handle both /uploads/... and uploads/... paths
+    const cleanPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
+    return `${getApiBaseUrl().replace('/api', '')}${cleanPath}`;
   };
 
   return (

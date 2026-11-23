@@ -315,11 +315,26 @@ export default function KioskPage() {
     
     setScanState('scanning');
     
+    // Step 1: Capture photo FIRST (before scan)
+    console.log('📸 Step 1: Capturing photo from webcam...');
+    const screenshot = webcamRef.current?.getScreenshot();
+    const b64 = screenshot ? screenshot.split(',')[1] : null;
+    setCapturedB64(b64);
+    
+    if (b64) {
+      console.log('✅ Photo captured successfully!');
+      console.log(`📏 Photo size: ${(b64.length / 1024).toFixed(2)} KB`);
+    } else {
+      console.warn('⚠️ No photo captured (camera might not be ready)');
+    }
+    
     try {
-      console.log('📡 Calling backend for BLE scan...');
+      console.log('📡 Step 2: Calling backend for BLE scan with photo...');
       
+      // Step 2: Scan for BLE device AND send photo in same request
       const response = await api.post('/attendance/scan-ble', {
-        kiosk_id: KIOSK_ID
+        kiosk_id: KIOSK_ID,
+        photo_base64: b64, // Send photo with scan request
       });
       
       const data = response.data;
@@ -328,25 +343,25 @@ export default function KioskPage() {
       if (data.success) {
         // Found student!
         console.log(`✅ Student detected: ${data.student_name}`);
+        console.log(`   Attendance ID: ${data.attendance_id}`);
         console.log(`   Status: ${data.attendance_status}`);
+        console.log(`   Photo saved: ${data.photo_path || 'No'}`);
         
         setScanState('processing');
-        
-        // Capture photo
-        const screenshot = webcamRef.current?.getScreenshot();
-        const b64 = screenshot ? screenshot.split(',')[1] : null;
-        setCapturedB64(b64);
         
         // Show success with attendance status
         setResult({
           identifier: data.student_id.toString(),
           student_name: data.student_name,
-          status: data.attendance_status || 'Partial', // Show Time-In, Late, or Time-Out
-          session: 'Pending Approval',
+          status: data.attendance_status || 'Partial',
+          session: 'Recorded',
+          photo_path: data.photo_path,
+          attendanceId: data.attendance_id,
         });
         setScanState('success');
         
         console.log(`✅ ${data.message}`);
+        console.log('📸 Photo automatically saved with attendance record!');
       } else {
         // No student found
         console.log('❌ No BLE token detected');
