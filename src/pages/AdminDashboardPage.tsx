@@ -7,7 +7,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Tooltip,
   Drawer, AppBar, Toolbar, useMediaQuery, useTheme as useMuiTheme, InputAdornment,
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid2 from '@mui/material/Unstable_Grid2';
 import {
   People, School, Router, Sms, Dashboard, Logout, Add, Edit,
   ToggleOn, ToggleOff, LockReset, Menu, Close, PersonAdd,
@@ -132,8 +132,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
       </DialogTitle>
       <DialogContent sx={{ pt: 3 }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Username *"
               fullWidth
@@ -141,8 +141,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
               onChange={e => set('username', e.target.value)}
               placeholder="parent_username"
             />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Password *"
               type="password"
@@ -151,8 +151,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
               onChange={e => set('password', e.target.value)}
               placeholder="Password"
             />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Full Name *"
               fullWidth
@@ -160,8 +160,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
               onChange={e => set('name', e.target.value)}
               placeholder="John Doe"
             />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>Relationship *</InputLabel>
               <Select
@@ -179,8 +179,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
                 <MenuItem value="Sibling">Sibling</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Contact"
               fullWidth
@@ -188,8 +188,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
               onChange={e => set('contact', e.target.value)}
               placeholder="09XXXXXXXXX"
             />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Address"
               fullWidth
@@ -197,8 +197,8 @@ function AddParentDialog({ open, onClose, student, onCreated }: {
               onChange={e => set('address', e.target.value)}
               placeholder="City, Province"
             />
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} variant="outlined">
@@ -325,9 +325,9 @@ function EditUserDialog({
           />
         </Box>
 
-        <Grid container spacing={2}>
+        <Grid2 container spacing={2}>
           {/* Username */}
-          <Grid size={{ xs: 12 }}>
+          <Grid2 size={{ xs: 12 }}>
             <TextField
               label="Username *"
               fullWidth
@@ -336,10 +336,10 @@ function EditUserDialog({
               placeholder="Enter username"
               helperText="Unique identifier for login"
             />
-          </Grid>
+          </Grid2>
 
           {/* Full Name */}
-          <Grid size={{ xs: 12 }}>
+          <Grid2 size={{ xs: 12 }}>
             <TextField
               label="Full Name *"
               fullWidth
@@ -348,10 +348,10 @@ function EditUserDialog({
               placeholder="Enter full name"
               helperText="Display name for the user"
             />
-          </Grid>
+          </Grid2>
 
           {/* Phone Number */}
-          <Grid size={{ xs: 12 }}>
+          <Grid2 size={{ xs: 12 }}>
             <TextField
               label="Phone Number"
               fullWidth
@@ -360,8 +360,8 @@ function EditUserDialog({
               placeholder="e.g., 09171234567"
               helperText="Optional contact number"
             />
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -489,37 +489,37 @@ function EditStudentDialog({
         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1565c0', mb: 1.5 }}>
           🎓 Name for SF2 (Last Name, First Name, Middle Name)
         </Typography>
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Last Name" fullWidth value={form.last_name}
               onChange={e => set('last_name', e.target.value)}
               helperText="e.g. Dela Cruz" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="First Name" fullWidth value={form.first_name}
               onChange={e => set('first_name', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Middle Name" fullWidth value={form.middle_name}
               onChange={e => set('middle_name', e.target.value)}
               helperText="Optional" />
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
 
         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#555', mb: 1.5 }}>
           Student Information
         </Typography>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="Full Name (system)" fullWidth value={form.name}
               onChange={e => set('name', e.target.value)}
               helperText="Auto-updated from Last/First/Middle when saved" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="LRN *" fullWidth value={form.lrn}
               onChange={e => set('lrn', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Gender</InputLabel>
               <Select value={form.gender} label="Gender" onChange={e => set('gender', e.target.value)}>
@@ -527,81 +527,81 @@ function EditStudentDialog({
                 <MenuItem value="Female">Female</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Grade Level" fullWidth value={form.grade}
               onChange={e => set('grade', e.target.value)} placeholder="e.g. Grade 9" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Section" fullWidth value={form.section}
               onChange={e => set('section', e.target.value)} placeholder="e.g. IT3R4" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="RFID UID" fullWidth value={form.rfid_uid}
               onChange={e => set('rfid_uid', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="MAC Address (BLE)" fullWidth value={form.mac_address}
               onChange={e => set('mac_address', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="Contact" fullWidth value={form.contact}
               onChange={e => set('contact', e.target.value)} />
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
 
         {/* SF1 Fields */}
         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2e7d32', mb: 1.5, mt: 2.5 }}>
           📄 SF1 Fields (School Register)
         </Typography>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Birthdate" type="date" fullWidth value={form.birthdate}
               onChange={e => set('birthdate', e.target.value)}
               InputLabelProps={{ shrink: true }}
               helperText="mm/dd/yyyy format in SF1" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Birth Place (Province)" fullWidth value={form.birth_place}
               onChange={e => set('birth_place', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Mother Tongue" fullWidth value={form.mother_tongue}
               onChange={e => set('mother_tongue', e.target.value)}
               placeholder="e.g. Cebuano" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="IP / Ethnic Group" fullWidth value={form.ip_ethnic}
               onChange={e => set('ip_ethnic', e.target.value)}
               placeholder="Leave blank if not applicable" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Religion" fullWidth value={form.religion}
               onChange={e => set('religion', e.target.value)}
               placeholder="e.g. Roman Catholic" />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="SF1 Remarks" fullWidth value={form.sf1_remarks}
               onChange={e => set('sf1_remarks', e.target.value)}
               placeholder="e.g. T/O, DRP, CCT" />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12 }}>
             <TextField label="House # / Street / Sitio / Purok" fullWidth value={form.address_street}
               onChange={e => set('address_street', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Barangay" fullWidth value={form.barangay}
               onChange={e => set('barangay', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Municipality / City" fullWidth value={form.municipality}
               onChange={e => set('municipality', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <TextField label="Province" fullWidth value={form.province}
               onChange={e => set('province', e.target.value)} />
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} variant="outlined">Cancel</Button>
@@ -666,8 +666,8 @@ function SchoolSettingsPanel() {
           </Typography>
         </Box>
         <Box sx={{ p: 5 }}>
-          <Grid container spacing={4}>
-            <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid2 container spacing={4}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <TextField 
                 label="School ID" 
                 fullWidth 
@@ -677,8 +677,8 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <TextField 
                 label="School Year" 
                 fullWidth 
@@ -688,8 +688,8 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField 
                 label="Name of School" 
                 fullWidth 
@@ -699,9 +699,9 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
+            </Grid2>
             {/* SF1 fields */}
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField 
                 label="Region" 
                 fullWidth 
@@ -712,8 +712,8 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField 
                 label="Division" 
                 fullWidth 
@@ -724,8 +724,8 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField 
                 label="District" 
                 fullWidth 
@@ -736,8 +736,8 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField 
                 label="School Head Name" 
                 fullWidth 
@@ -747,8 +747,8 @@ function SchoolSettingsPanel() {
                 InputProps={{ sx: { fontSize: 18, height: 64 } }}
                 InputLabelProps={{ sx: { fontSize: 18 } }}
               />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <Button 
                 variant="contained" 
                 onClick={handleSave} 
@@ -764,8 +764,8 @@ function SchoolSettingsPanel() {
               >
                 {saving ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : '💾 Save Settings'}
               </Button>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Box>
       </Paper>
       <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack(s => ({ ...s, open: false }))}>
@@ -831,26 +831,26 @@ function CreateUserDialog({ open, onClose, onCreated }: { open: boolean; onClose
       </DialogTitle>
       <DialogContent sx={{ pt: 3 }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="Username *" fullWidth value={form.username} onChange={e => set('username', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="Password *" type="password" fullWidth value={form.password} onChange={e => set('password', e.target.value)} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>Role *</InputLabel>
               <Select value={form.role} label="Role *" onChange={e => set('role', e.target.value)}>
                 {['admin','teacher','parent','student'].map(r => <MenuItem key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</MenuItem>)}
               </Select>
             </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="Full Name *" fullWidth value={form.name} onChange={e => set('name', e.target.value)}
               helperText={form.role === 'student' ? 'Auto-filled from Last/First/Middle below' : ''} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>Gender</InputLabel>
               <Select value={form.gender} label="Gender" onChange={e => set('gender', e.target.value)}>
@@ -858,82 +858,82 @@ function CreateUserDialog({ open, onClose, onCreated }: { open: boolean; onClose
                 <MenuItem value="Female">Female</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <TextField label="Contact" fullWidth value={form.contact} onChange={e => set('contact', e.target.value)} />
-          </Grid>
+          </Grid2>
           {form.role === 'teacher' && (
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <TextField label="Employee ID" fullWidth value={form.employee_id} onChange={e => set('employee_id', e.target.value)} />
-            </Grid>
+            </Grid2>
           )}
           {form.role === 'student' && (<>
-            <Grid size={{ xs: 12 }}>
+            <Grid2 size={{ xs: 12 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1565c0', mt: 1, mb: 0.5 }}>
                 🎓 Student Information (required for SF2)
               </Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField label="Last Name *" fullWidth value={form.last_name}
                 onChange={e => { set('last_name', e.target.value); }}
                 helperText="e.g. Dela Cruz" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField label="First Name *" fullWidth value={form.first_name}
                 onChange={e => { set('first_name', e.target.value); }}
                 helperText="e.g. Juan" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
               <TextField label="Middle Name" fullWidth value={form.middle_name}
                 onChange={e => set('middle_name', e.target.value)}
                 helperText="Optional" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <TextField label="LRN *" fullWidth value={form.lrn} onChange={e => set('lrn', e.target.value)}
                 helperText="12-digit Learner Reference Number" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 3 }}>
               <TextField label="Grade Level" fullWidth value={form.grade} onChange={e => set('grade', e.target.value)}
                 placeholder="e.g. Grade 9" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 3 }}>
               <TextField label="Section" fullWidth value={form.section} onChange={e => set('section', e.target.value)}
                 placeholder="e.g. IT3R4" />
-            </Grid>
+            </Grid2>
 
             {/* Parent Accounts Section */}
-            <Grid size={{ xs: 12 }}>
+            <Grid2 size={{ xs: 12 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 2, mb: 1, color: '#3b82f6' }}>
                 👨‍👩‍👦 Parent/Guardian Accounts (Optional)
               </Typography>
               <Typography variant="caption" sx={{ color: '#6b7280', display: 'block', mb: 2 }}>
                 Add up to 3 parent/guardian accounts. At least one parent account is recommended.
               </Typography>
-            </Grid>
+            </Grid2>
 
             {parents.map((parent, index) => (
-              <Grid size={{ xs: 12 }} key={index}>
+              <Grid2 size={{ xs: 12 }} key={index}>
                 <Paper sx={{ p: 2, bgcolor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 2, mb: 2 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: '#374151' }}>
                     {index === 0 ? '👨 Parent 1' : index === 1 ? '👩 Parent 2' : '👤 Guardian (Optional)'}
                   </Typography>
-                  <Grid container spacing={1.5}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                  <Grid2 container spacing={1.5}>
+                    <Grid2 size={{ xs: 12, sm: 6 }}>
                       <TextField label="Username" size="small" fullWidth value={parent.username}
                         onChange={e => setParent(index, 'username', e.target.value)}
                         placeholder={index === 2 ? 'Optional' : ''} />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6 }}>
                       <TextField label="Password" size="small" type="password" fullWidth value={parent.password}
                         onChange={e => setParent(index, 'password', e.target.value)}
                         placeholder={index === 2 ? 'Optional' : ''} />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6 }}>
                       <TextField label="Full Name" size="small" fullWidth value={parent.name}
                         onChange={e => setParent(index, 'name', e.target.value)}
                         placeholder={index === 2 ? 'Optional' : ''} />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 3 }}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 3 }}>
                       <FormControl fullWidth size="small">
                         <InputLabel>Relationship</InputLabel>
                         <Select value={parent.relationship} label="Relationship"
@@ -943,18 +943,18 @@ function CreateUserDialog({ open, onClose, onCreated }: { open: boolean; onClose
                           ))}
                         </Select>
                       </FormControl>
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 3 }}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 3 }}>
                       <TextField label="Contact" size="small" fullWidth value={parent.contact}
                         onChange={e => setParent(index, 'contact', e.target.value)} placeholder="09xxxxxxxxx" />
-                    </Grid>
-                  </Grid>
+                    </Grid2>
+                  </Grid2>
                 </Paper>
-              </Grid>
+              </Grid2>
             ))}
           </>)}
-          <Grid size={{ xs: 12 }}><TextField label="Address" fullWidth value={form.address} onChange={e => set('address', e.target.value)} /></Grid>
-        </Grid>
+          <Grid2 size={{ xs: 12 }}><TextField label="Address" fullWidth value={form.address} onChange={e => set('address', e.target.value)} /></Grid2>
+        </Grid2>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} variant="outlined">Cancel</Button>
@@ -1428,20 +1428,20 @@ export default function AdminDashboardPage() {
           {/* ── Dashboard Tab ── */}
           {tab === 'dashboard' && (
             <>
-              <Grid container spacing={2.5} mb={3}>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid2 container spacing={2.5} mb={3}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Total Students" value={stats?.total_students} icon={<School />} color="#1565c0" />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Attendance Rate" value={stats?.attendance_rate_today != null ? `${stats.attendance_rate_today}%` : '—'} icon={<CheckCircle />} color="#2e7d32" />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="Active Kiosks" value={stats?.active_kiosks} icon={<Router />} color="#e65100" />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <StatCard label="SMS Sent Today" value={stats?.sms_today} icon={<Sms />} color="#6a1b9a" />
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
 
               {/* ── Attendance Alerts ── */}
               {alertCount > 0 && (
@@ -2187,9 +2187,9 @@ export default function AdminDashboardPage() {
           {/* ── Announcements Tab ── */}
           {tab === 'announcements' && (
             <Box sx={{ width: '100%', minHeight: 'calc(100vh - 100px)' }}>
-              <Grid container spacing={4}>
+              <Grid2 container spacing={4}>
                 {/* Compose Form */}
-                <Grid size={{ xs: 12, md: 7 }}>
+                <Grid2 size={{ xs: 12, md: 7 }}>
                   <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden', height: '100%' }}>
                     <Box sx={{ p: 4, background: theme.colors.primary.gradient, color: '#fff' }}>
                       <Typography sx={{ fontFamily: theme.typography.fontFamily.display, fontWeight: 700, fontSize: 22 }}>
@@ -2283,10 +2283,10 @@ export default function AdminDashboardPage() {
                       </Button>
                     </Box>
                   </Paper>
-                </Grid>
+                </Grid2>
 
                 {/* Past Announcements */}
-                <Grid size={{ xs: 12, md: 5 }}>
+                <Grid2 size={{ xs: 12, md: 5 }}>
                   <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden', height: '100%' }}>
                     <Box sx={{
                       p: 3, bgcolor: '#f8faff', borderBottom: '1px solid #e0e0e0',
@@ -2337,8 +2337,8 @@ export default function AdminDashboardPage() {
                       </Box>
                     )}
                   </Paper>
-                </Grid>
-              </Grid>
+                </Grid2>
+              </Grid2>
             </Box>
           )}
 
