@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+﻿import { useEffect, useState, useRef, useCallback } from 'react';
 import { Box, Paper, Typography, Chip, CircularProgress, Button } from '@mui/material';
 import { LocationOn, RadioButtonChecked, SignalWifi4Bar } from '@mui/icons-material';
 import api from '../api/client';
@@ -118,6 +118,7 @@ export default function BLEPositioningMap({
   const [roomStudents, setRoomStudents] = useState<RoomStudent[]>([]);
   const [studentCounts, setStudentCounts] = useState<Map<number, number>>(new Map());
   const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null);
+  const [userClosedRoom, setUserClosedRoom] = useState(false); // Track if user manually closed room
 
   // Helper function to get API URL
   const connect = useCallback(() => {
@@ -356,120 +357,123 @@ export default function BLEPositioningMap({
     fetchRooms();
   }, [selectedFloor]);
 
-  // Fetch students and floor plan when room is selected
+  // Fetch floor plan when room is selected (ONCE, not on every position update)
   useEffect(() => {
     if (!selectedRoom) return;
-
-    console.log('🏠 Room selected:', selectedRoom);
-
+    
+    console.log('ðŸ  Room selected:', selectedRoom);
     const fetchRoomData = async () => {
       try {
-        console.log(`📡 Fetching data for Room ${selectedRoom.id}...`);
+        console.log(`ðŸ“¡ Fetching floor plan for Room ${selectedRoom.id}...`);
         
         const floorPlanRes = await api.get(`/buildings/rooms/${selectedRoom.id}/floor-plan`);
-
-        console.log('🗺️ Floor plan response:', floorPlanRes.data);
+        console.log('ðŸ—ºï¸ Floor plan response:', floorPlanRes.data);
         
-        // Filter students from the current positions (WebSocket data) that match this room's ESP32
-        // positions contains students currently tracked on the main map
-        const roomESP32 = selectedRoom.esp32_ip;
-        console.log('🔍 Filtering students for ESP32:', roomESP32);
-        console.log('📊 Current positions from WebSocket:', positions);
-        console.log('📊 Positions count:', positions.length);
-        
-        // Distance threshold for classroom presence (in meters)
-        const CLASSROOM_DISTANCE_THRESHOLD = 3.0; // 3 meters - students beyond this are considered "outside" (exited)
-        
-        // Map positions to student format expected by floor plan
-        const filteredStudents = positions
-          .filter(pos => {
-            // Find nearest anchor
-            if (!pos.anchors || pos.anchors.length === 0) {
-              console.log(`⚠️ ${pos.target_name} has no anchor data - skipping`);
-              return false;
-            }
-            
-            const nearestAnchor = pos.anchors.reduce((nearest, anchor) => 
-              anchor.distance < nearest.distance ? anchor : nearest
-            );
-            
-            const nearestDistance = nearestAnchor.distance;
-            const nearestAnchorId = nearestAnchor.id;
-            
-            // Map anchor IDs to building names
-            const anchorBuildingMap: {[key: number]: string} = {
-              1: 'Classroom',
-              2: 'Cafeteria',
-              3: 'Library'
-            };
-            
-            const studentBuilding = anchorBuildingMap[nearestAnchorId] || 'Unknown';
-            
-            console.log('🎯 Checking position:', {
-              name: pos.target_name,
-              nearestAnchor: nearestAnchorId,
-              nearestAnchorDistance: nearestDistance.toFixed(2),
-              studentBuilding: studentBuilding,
-              selectedRoom: selectedRoom.name,
-              id: pos.target_id
-            });
-            
-            // CRITICAL FIX: Only show students whose nearest anchor matches the current room's building
-            // For now, since we only have "Library" in database, show students near Anchor 3 (Library)
-            // TODO: When Classroom and Cafeteria are added to database, update this logic
-            const isCorrectBuilding = nearestAnchorId === 3; // Only show students near Library anchor (ID 3)
-            
-            if (!isCorrectBuilding) {
-              console.log(`🚫 ${pos.target_name} is nearest to ${studentBuilding} (not Library) - removed from this room`);
-              return false;
-            }
-            
-            // Distance threshold for classroom presence (in meters)
-            const CLASSROOM_DISTANCE_THRESHOLD = 3.0;
-            const isInRange = nearestDistance <= CLASSROOM_DISTANCE_THRESHOLD;
-            
-            if (!isInRange) {
-              console.log(`🚪 ${pos.target_name} is OUT OF RANGE (${nearestDistance.toFixed(1)}m > ${CLASSROOM_DISTANCE_THRESHOLD}m)`);
-              return false;
-            }
-            
-            console.log(`✅ ${pos.target_name} is IN LIBRARY RANGE (${nearestDistance.toFixed(1)}m from Anchor 3)`);
-            return true;
-          })
-          .map(pos => {
-            const nearestDistance = pos.anchors && pos.anchors.length > 0
-              ? Math.min(...pos.anchors.map(a => a.distance))
-              : pos.accuracy_m;
-            
-            return {
-              id: pos.target_id,
-              student_name: pos.target_name,
-              grade: pos.grade || '10', // Default grade if not provided
-              section: pos.section || 'A',
-              distance: nearestDistance, // Use nearest anchor distance for display
-            };
-          });
-        
-        console.log('✅ Filtered students for floor plan (within 3m):', filteredStudents);
-        console.log('📈 Will show', filteredStudents.length, 'students on floor plan');
-        setRoomStudents(filteredStudents);
-        
+        // Set floor plan image
         if (floorPlanRes.data.floor_plan?.image_url) {
           const baseUrl = getApiBaseUrl().replace(/\/api\/?$/, '');
           const imageUrl = `${baseUrl}${floorPlanRes.data.floor_plan.image_url}`;
-          console.log('🖼️ Floor plan URL:', imageUrl);
+          console.log('ðŸ–¼ï¸ Floor plan URL:', imageUrl);
           setFloorPlanUrl(imageUrl);
         } else {
-          console.log('⚠️ No floor plan in response');
+          console.log('âš ï¸ No floor plan in response');
           setFloorPlanUrl(null);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch room data:', error);
+        console.error('âŒ Failed to fetch room data:', error);
         setFloorPlanUrl(null);
       }
     };
     fetchRoomData();
-  }, [selectedRoom, positions]); // Add positions as dependency so it updates when students move
+  }, [selectedRoom]); // Only run when room is selected, NOT on position updates
+
+  // Update student positions in the room (runs when positions change)
+  useEffect(() => {
+    if (!selectedRoom) return;
+    
+    console.log('ðŸ“Š Updating student positions for room...');
+    
+    const roomESP32 = selectedRoom.esp32_ip;
+    console.log('ðŸ” Filtering students for ESP32:', roomESP32);
+    console.log('ðŸ“Š Current positions from WebSocket:', positions);
+    console.log('ðŸ“Š Positions count:', positions?.length || 0);
+    
+    // Distance threshold for classroom presence (in meters)
+    const CLASSROOM_DISTANCE_THRESHOLD = 3.0; // 3 meters - students beyond this are considered "outside" (exited)
+    
+    // Map positions to student format expected by floor plan
+    const filteredStudents = (positions || [])
+      .filter(pos => {
+        // Find nearest anchor
+        if (!pos.anchors || pos.anchors.length === 0) {
+          console.log(`âš ï¸ ${pos.target_name} has no anchor data - skipping`);
+          return false;
+        }
+        
+        const nearestAnchor = pos.anchors.reduce((nearest, anchor) => 
+          anchor.distance < nearest.distance ? anchor : nearest
+        );
+        
+        const nearestDistance = nearestAnchor.distance;
+        const nearestAnchorId = nearestAnchor.id;
+        
+        // Map anchor IDs to building names
+        const anchorBuildingMap: {[key: number]: string} = {
+          1: 'Classroom',
+          2: 'Cafeteria',
+          3: 'Library'
+        };
+        
+        const studentBuilding = anchorBuildingMap[nearestAnchorId] || 'Unknown';
+        
+        console.log('ðŸŽ¯ Checking position:', {
+          name: pos.target_name,
+          nearestAnchor: nearestAnchorId,
+          nearestAnchorDistance: nearestDistance.toFixed(2),
+          studentBuilding: studentBuilding,
+          selectedRoom: selectedRoom.room_name,
+          id: pos.target_id
+        });
+        
+        // CRITICAL FIX: Only show students whose nearest anchor matches the current room's building
+        // For now, since we only have "Library" in database, show students near Anchor 3 (Library)
+        // TODO: When Classroom and Cafeteria are added to database, update this logic
+        const isCorrectBuilding = nearestAnchorId === 3; // Only show students near Library anchor (ID 3)
+        
+        if (!isCorrectBuilding) {
+          console.log(`ðŸš« ${pos.target_name} is nearest to ${studentBuilding} (not Library) - removed from this room`);
+          return false;
+        }
+        
+        // Distance threshold for classroom presence (in meters)
+        const isInRange = nearestDistance <= CLASSROOM_DISTANCE_THRESHOLD;
+        
+        if (!isInRange) {
+          console.log(`ðŸšª ${pos.target_name} is OUT OF RANGE (${nearestDistance.toFixed(1)}m > ${CLASSROOM_DISTANCE_THRESHOLD}m)`);
+          return false;
+        }
+        
+        console.log(`âœ… ${pos.target_name} is IN LIBRARY RANGE (${nearestDistance.toFixed(1)}m from Anchor 3)`);
+        return true;
+      })
+      .map(pos => {
+        const nearestDistance = pos.anchors && pos.anchors.length > 0
+          ? Math.min(...pos.anchors.map(a => a.distance))
+          : pos.accuracy_m;
+        
+        return {
+          id: pos.target_id,
+          student_name: pos.target_name,
+          grade: pos.grade || '10', // Default grade if not provided
+          section: pos.section || 'A',
+          distance: nearestDistance, // Use nearest anchor distance for display
+        };
+      });
+    
+    console.log('âœ… Filtered students for floor plan (within 3m):', filteredStudents);
+    console.log('ðŸ“ˆ Will show', filteredStudents.length, 'students on floor plan');
+    setRoomStudents(filteredStudents);
+  }, [positions, selectedRoom]); // Update students when positions change // Add positions as dependency so it updates when students move
 
   // Handler functions
   const handleOpenFloorPlan = () => {
@@ -486,6 +490,7 @@ export default function BLEPositioningMap({
 
   const handleSelectRoom = (room: Room) => {
     setSelectedRoom(room);
+    setUserClosedRoom(false); // User is selecting a room, not closing it
   };
 
   const handleBackToFloors = () => {
@@ -497,6 +502,7 @@ export default function BLEPositioningMap({
     setSelectedRoom(null);
     setRoomStudents([]);
     setFloorPlanUrl(null);
+    setUserClosedRoom(true); // User manually closed the room
   };
 
   const handleCloseOverlays = () => {
@@ -507,6 +513,7 @@ export default function BLEPositioningMap({
     setRooms([]);
     setRoomStudents([]);
     setFloorPlanUrl(null);
+    setUserClosedRoom(true); // User manually closed all overlays
   };
 
   // NEW: Manual trigger to open Library floors
