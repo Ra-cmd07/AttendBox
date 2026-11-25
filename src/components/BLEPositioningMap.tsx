@@ -238,10 +238,10 @@ export default function BLEPositioningMap({
       // Handle student marker click
       if (event.data && event.data.type === 'student-marker-clicked') {
         console.log('🎯 Student marker clicked!', event.data);
-        console.log('🏢 Buildings available:', buildings.length);
+        console.log('🏢 Buildings available:', buildings?.length || 0);
         
         // Auto-select Library building when student dot is clicked
-        if (buildings.length > 0) {
+        if (buildings && buildings.length > 0) {
           const library = buildings.find(b => b.name === 'Library');
           console.log('🔍 Library building found:', library);
           if (library) {
@@ -258,10 +258,10 @@ export default function BLEPositioningMap({
       // Handle building marker (anchor) click
       if (event.data && event.data.type === 'building-marker-clicked') {
         console.log('🏢 Building marker (Anchor) clicked!', event.data);
-        console.log('🏢 Buildings available:', buildings.length);
+        console.log('🏢 Buildings available:', buildings?.length || 0);
         
         // Auto-select Library building when green anchor marker is clicked
-        if (buildings.length > 0) {
+        if (buildings && buildings.length > 0) {
           const library = buildings.find(b => b.name === event.data.buildingName || b.name === 'Library');
           console.log('🔍 Library building found:', library);
           if (library) {
@@ -689,7 +689,7 @@ export default function BLEPositioningMap({
       )}
 
       {/* Position Info Panel (Diagnostic Mode) */}
-      {showDiagnostics && positions.length > 0 && (
+      {showDiagnostics && positions && positions.length > 0 && (
         <Paper
           elevation={3}
           sx={{
