@@ -98,6 +98,7 @@ export default function BLEPositioningMap({
   showDiagnostics = false,
   filterStudentName,  // NEW: If provided, only show this student
 }: BLEPositioningMapProps) {
+  console.log('🗺️ BLEPositioningMap loaded - Build: 2026-11-25-v3');
   const [connected, setConnected] = useState(false);
   const [positions, setPositions] = useState<BLEPosition[]>([]);  // Changed to array
   const [waiting, setWaiting] = useState<{ active_anchors: number; needed: number } | null>(null);
